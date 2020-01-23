@@ -3,7 +3,6 @@ package gee
 import (
 	"encoding/json"
 	"fmt"
-	"math/rand"
 	"net/http"
 	"strings"
 )
@@ -28,8 +27,13 @@ type Context struct {
 
 // newContext new a context for http interface
 func newContext(e *Engine) *Context {
-	c := &Context{engine: e, index: -1, id: rand.Intn(100)}
+	c := &Context{engine: e, index: -1, id: int(e.seqId())}
 	return c
+}
+
+// String for output
+func (c *Context) Info() string {
+	return fmt.Sprintf("context{Path:%s,Method:%s,index:%d,id:%d}", c.Path, c.Method, c.index, c.id)
 }
 
 // BeginRequest

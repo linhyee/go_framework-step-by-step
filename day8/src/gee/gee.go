@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"sync/atomic"
 )
 
 // HandlerFunc defines the request handler used by gee
@@ -19,6 +20,7 @@ type (
 		htmlTemplates *template.Template // for html render
 		funcMap       template.FuncMap   // for html render
 		contextPool   *Pool
+		seqId         func() int64
 	}
 
 	RouterGroup struct {
@@ -29,9 +31,17 @@ type (
 	}
 )
 
+// Sequence number generator
+func SequenceId() func() int64 {
+	var id int64
+	return func() int64 {
+		return atomic.AddInt64(&id, 1)
+	}
+}
+
 // New function is the constructor of gee.Engine
 func New() *Engine {
-	e := &Engine{router: newRouter()}
+	e := &Engine{router: newRouter(), seqId: SequenceId()}
 	e.RouterGroup = &RouterGroup{engine: e}
 	e.groups = []*RouterGroup{e.RouterGroup}
 
